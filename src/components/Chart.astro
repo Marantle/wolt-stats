@@ -1,0 +1,19 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  subtitle?: string;
+  width?: string;
+  height?: string;
+}
+
+const { id, title, subtitle, width = "100%", height = "400px" } = Astro.props;
+---
+
+<div class="bg-white p-4 rounded-lg shadow-md mb-6">
+  <h2 class="text-xl font-semibold text-gray-800">{title}</h2>
+  {subtitle && <p class="text-gray-500 mb-4">{subtitle}</p>}
+  <div class="relative" style={`width: ${width}; height: ${height};`}>
+    <canvas id={id}></canvas>
+  </div>
+</div>

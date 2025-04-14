@@ -1,0 +1,39 @@
+---
+// Import any scripts or styles needed by layout
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Wolt Stats Dashboard" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+			<title>{title}</title>
+	</head>
+	<body class="bg-gray-50 min-h-screen">
+		<header class="bg-blue-600 text-white shadow-md">
+			<div class="container mx-auto py-6 px-4">
+				<h1 class="text-3xl font-bold">Wolt Stats Dashboard</h1>
+				<p class="mt-2 text-blue-100">Visualizing your Wolt order history</p>
+			</div>
+		</header>
+		
+		<main class="container mx-auto py-8 px-4">
+			<slot />
+		</main>
+		
+		<footer class="bg-gray-800 text-white mt-12">
+			<div class="container mx-auto py-6 px-4 text-center">
+				<p>Built with Astro and TailwindCSS</p>
+			</div>
+		</footer>
+	</body>
+</html>
