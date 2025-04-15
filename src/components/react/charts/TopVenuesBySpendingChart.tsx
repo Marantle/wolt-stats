@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Chart from './Chart';
 import { type ChartData } from 'chart.js';
 
@@ -7,16 +7,16 @@ interface TopVenuesBySpendingChartProps {
   id?: string;
   width?: string;
   height?: string;
+  isCensored?: boolean;
 }
 
 const TopVenuesBySpendingChart: React.FC<TopVenuesBySpendingChartProps> = ({
   topVenues,
   id = 'top-venues-spending',
   width,
-  height
+  height,
+  isCensored = true
 }) => {
-  const [isCensored, setIsCensored] = useState(true);
-
   const processedVenues = topVenues.map((item, index) => ({
     ...item,
     venue: isCensored ? `[Venue ${index + 1}]` : item.venue
@@ -50,12 +50,6 @@ const TopVenuesBySpendingChart: React.FC<TopVenuesBySpendingChartProps> = ({
 
   return (
     <div>
-      <button
-        onClick={() => setIsCensored(!isCensored)}
-        className="mb-2 px-3 py-1 text-sm rounded bg-blue-500 hover:bg-blue-600 text-white"
-      >
-        {isCensored ? 'Show Venue Names' : 'Hide Venue Names'}
-      </button>
       <Chart
         id={id}
         title="Top Venues by Total Spent"

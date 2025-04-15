@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 interface FavoriteItemsTableProps {
   items: { item: string; count: number }[];
   title?: string;
   maxHeight?: string;
+  isCensored?: boolean;
 }
 
 const FavoriteItemsTable: React.FC<FavoriteItemsTableProps> = ({
   items,
   title = "Favorite Items",
-  maxHeight = "400px"
+  maxHeight = "400px",
+  isCensored = true
 }) => {
-  const [isCensored, setIsCensored] = useState(true);
-
   const processedItems = items.map((item, index) => ({
     ...item,
     item: isCensored ? `[Item ${index + 1}]` : item.item
@@ -21,12 +21,6 @@ const FavoriteItemsTable: React.FC<FavoriteItemsTableProps> = ({
   return (
     <div className="bg-white p-4 rounded-lg shadow-md mb-6">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
-      <button
-        onClick={() => setIsCensored(!isCensored)}
-        className="mb-2 px-3 py-1 text-sm rounded bg-blue-500 hover:bg-blue-600 text-white"
-      >
-        {isCensored ? 'Show Item Names' : 'Hide Item Names'}
-      </button>
       <div className="overflow-auto" style={{ maxHeight }}>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

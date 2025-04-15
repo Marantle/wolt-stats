@@ -3,7 +3,7 @@ import type { WoltOrder, WoltOrderFile } from '../../woltorder';
 import { getOrdersByMonth, getTopVenuesByOrderCount, getTopVenuesBySpending, 
   getAverageOrderValueByMonth, getOrdersByDayOfWeek, getOrdersByTimeOfDay, 
   getFavoriteItems, formatCurrency, getSummaryStats } from '../../utils/orderUtils';
-import { generateStatsForSharing, compressStats, decompressStats } from '../../utils/shareUtils';
+import { generateStatsForSharing, compressStats, decompressStats, type SharedData } from '../../utils/shareUtils';
 import Welcome from './Welcome';
 import StatsCard from './StatsCard';
 import FavoriteItemsTable from './FavoriteItemsTable';
@@ -15,9 +15,18 @@ import AvgOrderOverTimeChart from './charts/AvgOrderOverTimeChart';
 import OrdersByDayChart from './charts/OrdersByDayChart';
 import OrderTimeHistogram from './charts/OrderTimeHistogram';
 
+interface PrivacySettings {
+  hideVenues: boolean;
+  hideItems: boolean;
+}
+
 export default function App() {
   const [orderData, setOrderData] = useState<WoltOrder[] | null>(null);
-  const [sharedStats, setSharedStats] = useState<ReturnType<typeof generateStatsForSharing> | null>(null);
+  const [sharedData, setSharedData] = useState<SharedData | null>(null);
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
+    hideVenues: true,
+    hideItems: true
+  });
 
   useEffect(() => {
     // Check URL for shared stats
@@ -26,7 +35,8 @@ export default function App() {
     if (stats) {
       const decompressed = decompressStats(stats);
       if (decompressed) {
-        setSharedStats(decompressed);
+        setSharedData(decompressed);
+        setPrivacySettings(decompressed.privacySettings);
       }
     }
   }, []);
@@ -40,7 +50,7 @@ export default function App() {
     if (!orderData) return;
     
     const stats = generateStatsForSharing(orderData);
-    const compressed = compressStats(stats);
+    const compressed = compressStats(stats, privacySettings);
     const url = new URL(window.location.href);
     url.searchParams.set('stats', compressed);
     
@@ -50,11 +60,28 @@ export default function App() {
       .catch(() => alert('Failed to copy share link'));
   };
 
-  if (!orderData && !sharedStats) {
+  const handleReset = () => {
+    setOrderData(null);
+    setSharedData(null);
+    // Clear URL parameters
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.pushState({}, '', url);
+  };
+
+  const toggleHideVenues = () => {
+    setPrivacySettings(prev => ({ ...prev, hideVenues: !prev.hideVenues }));
+  };
+
+  const toggleHideItems = () => {
+    setPrivacySettings(prev => ({ ...prev, hideItems: !prev.hideItems }));
+  };
+
+  if (!orderData && !sharedData) {
     return <Welcome onDataLoaded={handleDataLoaded} />;
   }
 
-  const stats = sharedStats || (orderData ? generateStatsForSharing(orderData) : null);
+  const stats = sharedData?.stats || (orderData ? generateStatsForSharing(orderData) : null);
   if (!stats) return null;
 
   const {
@@ -73,14 +100,38 @@ export default function App() {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-700">Order Overview</h2>
-          {orderData && (
+          <div className="flex gap-4">
+            {orderData && (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    onClick={toggleHideVenues}
+                    className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                  >
+                    {privacySettings.hideVenues ? 'Show Venues' : 'Hide Venues'}
+                  </button>
+                  <button
+                    onClick={toggleHideItems}
+                    className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+                  >
+                    {privacySettings.hideItems ? 'Show Items' : 'Hide Items'}
+                  </button>
+                </div>
+                <button
+                  onClick={handleShare}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                >
+                  Share Stats
+                </button>
+              </>
+            )}
             <button
-              onClick={handleShare}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              onClick={handleReset}
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
             >
-              Share Stats
+              Reset Data
             </button>
-          )}
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -120,8 +171,8 @@ export default function App() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <TopVenuesByCountChart topVenues={topVenuesByCount} />
-        <TopVenuesBySpendingChart topVenues={topVenuesBySpending} />
+        <TopVenuesByCountChart topVenues={topVenuesByCount} isCensored={privacySettings.hideVenues} />
+        <TopVenuesBySpendingChart topVenues={topVenuesBySpending} isCensored={privacySettings.hideVenues} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -131,7 +182,7 @@ export default function App() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <OrderTimeHistogram ordersByTime={ordersByTime} />
-        <FavoriteItemsTable items={favoriteItems} />
+        <FavoriteItemsTable items={favoriteItems} isCensored={privacySettings.hideItems} />
       </div>
     </>
   );

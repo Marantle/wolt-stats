@@ -115,12 +115,13 @@ export function getTotalSpent(orders: WoltOrder[]): number {
 
 // Get order distribution by day of week
 export function getOrdersByDayOfWeek(orders: WoltOrder[]): { day: string; count: number }[] {
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const dayCount = Array(7).fill(0);
 
   orders.forEach(order => {
     const date = parseOrderDate(order.received_at);
-    const dayOfWeek = date.getDay();
+    let dayOfWeek = date.getDay(); // 0-6, starting with Sunday
+    dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday-based (0-6)
     dayCount[dayOfWeek]++;
   });
 
