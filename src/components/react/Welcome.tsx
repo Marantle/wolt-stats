@@ -69,21 +69,36 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
   }
 
   return (
-    <div 
-      className={`flex flex-col items-center justify-center min-h-[400px] border-4 border-dashed rounded-lg p-8 transition-colors ${
-        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
+    <div className="text-center p-8">
       <h2 className="text-2xl font-bold mb-4 text-gray-700">Welcome to Wolt Stats Dashboard</h2>
-      <p className="text-gray-600 text-center mb-6">
-        Drag and drop your Wolt order export file here to get started
-      </p>
-      <div className="text-sm text-gray-500">
-        <p>Accepted file format: JSON</p>
-        <p>Contains your Wolt order history export</p>
+      <div className="max-w-2xl mx-auto">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">How to get your order data:</h3>
+        <ol className="text-left text-gray-600 mb-6 space-y-2 list-decimal list-inside">
+          <li>Visit <a href="https://wolt.com/en/me/order-history" className="text-blue-600 hover:underline" target="_blank" rel="noopener">Wolt Order History</a></li>
+          <li>Open your browser's Developer Tools (F12)</li>
+          <li>Go to the Network tab</li>
+          <li>Refresh the page</li>
+          <li>Find the request to <code className="bg-gray-100 px-2 py-1 rounded">order_history</code></li>
+          <li>Right-click and select "Copy as cURL"</li>
+          <li>Paste in your terminal, modify the URL's limit parameter to 5000</li>
+          <li>Pipe the output to <code className="bg-gray-100 px-2 py-1 rounded">wolt_order_dump.json</code></li>
+        </ol>
+
+        <div 
+          className={`flex flex-col items-center justify-center min-h-[200px] border-4 border-dashed rounded-lg p-8 transition-colors ${
+            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <p className="font-medium mb-4">Drop your Wolt order data file here</p>
+          <div className="text-sm text-gray-500 space-y-1">
+            <p>✓ File format: JSON</p>
+            <p>✓ Contains complete order history</p>
+            <p>✓ Filename: wolt_order_dump.json</p>
+          </div>
+        </div>
       </div>
     </div>
   );
