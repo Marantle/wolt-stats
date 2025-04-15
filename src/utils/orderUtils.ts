@@ -1,18 +1,36 @@
-import type { WoltOrder, WoltOrderFile } from '../woltorder';
+import type { WoltOrder } from '../../woltorder';
 
-// Helper function to parse the date from the format "dd/mm/yyyy, hh:mm"
+// Helper function to parse the date from formats "dd/mm/yyyy, hh:mm" or "dd.mm.yyyy hh.mm"
 export function parseOrderDate(dateString: string): Date {
-  const [datePart, timePart] = dateString.split(', ');
-  const [day, month, year] = datePart.split('/').map(Number);
-  const [hours, minutes] = timePart.split(':').map(Number);
+  // Handle both separator types
+  const [datePart, timePart] = dateString.includes(',')
+    ? dateString.split(', ')
+    : dateString.split(' ');
+
+  // Handle both date separator types (. or /)
+  const [day, month, year] = datePart.split(/[./]/).map(Number);
+
+  // Handle both time separator types (: or .)
+  const [hours, minutes] = timePart.split(/[.:]/).map(Number);
 
   return new Date(year, month - 1, day, hours, minutes);
 }
 
-// Function to extract the numeric value from a price string "€xx.xx"
+// Function to extract the numeric value from price strings "€xx.xx" or "xx,xx €"
 export function extractPrice(priceString: string): number {
   if (priceString === '--') return 0;
-  return parseFloat(priceString.replace('€', ''));
+
+  // Remove any whitespace
+  const cleaned = priceString.trim();
+
+  // Handle both formats
+  if (cleaned.startsWith('€')) {
+    // Format: €xx.xx
+    return parseFloat(cleaned.replace('€', ''));
+  } else {
+    // Format: xx,xx €
+    return parseFloat(cleaned.replace(' €', '').replace(',', '.'));
+  }
 }
 
 // Format monetary values
