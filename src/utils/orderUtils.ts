@@ -278,3 +278,149 @@ export function getSummaryStats(orders: WoltOrder[]) {
     longestStreak
   };
 }
+
+// Order Diversity Score Types
+export interface DiversityScore {
+  month: string;
+  score: number;
+  uniqueVenuesRatio: number;
+  uniqueItemsRatio: number;
+  newOrderRatio: number;
+}
+
+// Calculate monthly order diversity scores
+export function calculateDiversityScores(orders: WoltOrder[]): DiversityScore[] {
+  // Group orders by month
+  const ordersByMonth: Record<string, WoltOrder[]> = {};
+  
+  orders.forEach(order => {
+    const date = parseOrderDate(order.received_at);
+    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    if (!ordersByMonth[monthKey]) {
+      ordersByMonth[monthKey] = [];
+    }
+    
+    ordersByMonth[monthKey].push(order);
+  });
+
+  // Create a set of all venues and items seen so far for calculating "new" orders
+  const historicalVenues = new Set<string>();
+  const historicalItems = new Set<string>();
+  
+  // Sort months chronologically
+  const sortedMonths = Object.keys(ordersByMonth).sort();
+  
+  // Calculate diversity scores for each month
+  return sortedMonths.map(month => {
+    const monthOrders = ordersByMonth[month];
+    
+    // Count unique venues in this month
+    const monthVenues = new Set<string>();
+    monthOrders.forEach(order => monthVenues.add(order.venue_name));
+    
+    // Count unique items in this month and total item entries
+    const monthItems = new Set<string>();
+    let totalItemEntries = 0; // Track total item entries, not just orders
+    
+    monthOrders.forEach(order => {
+      if (!order.items) return;
+      const items = order.items.split(', ');
+      items.forEach(item => {
+        const trimmedItem = item.trim();
+        if (trimmedItem && !trimmedItem.includes('Pakkausmateriaali')) {
+          monthItems.add(trimmedItem);
+          totalItemEntries++; // Count each item entry
+        }
+      });
+    });
+    
+    // Calculate number of new venues and items (not seen in previous months)
+    let newVenueCount = 0;
+    let newItemCount = 0;
+    
+    monthVenues.forEach(venue => {
+      if (!historicalVenues.has(venue)) {
+        newVenueCount++;
+        historicalVenues.add(venue);
+      }
+    });
+    
+    monthItems.forEach(item => {
+      if (!historicalItems.has(item)) {
+        newItemCount++;
+        historicalItems.add(item);
+      }
+    });
+    
+    // Calculate ratios
+    const uniqueVenuesRatio = monthOrders.length > 0 ? 
+      Math.min(1, monthVenues.size / monthOrders.length) : 0;
+    
+    // Calculate uniqueItemsRatio as unique items divided by total item entries
+    // This measures how diverse the actual items ordered are, rather than items per order
+    const uniqueItemsRatio = totalItemEntries > 0 ? 
+      Math.min(1, monthItems.size / totalItemEntries) : 0;
+    
+    // For new order ratio, cap at 1.0 to prevent exceeding 100% 
+    const newItemsVenuesTotal = monthVenues.size + monthItems.size;
+    const newOrderRatio = (newItemsVenuesTotal > 0) ? 
+      Math.min(1, (newVenueCount + newItemCount) / newItemsVenuesTotal) : 0;
+    
+    // Calculate composite diversity score (weighted average)
+    // Weights can be adjusted based on importance
+    const venueWeight = 0.4;
+    const itemWeight = 0.4;
+    const newWeight = 0.2;
+    
+    // Ensure the score stays within 0-100 range
+    let score = (
+      uniqueVenuesRatio * venueWeight +
+      uniqueItemsRatio * itemWeight +
+      newOrderRatio * newWeight
+    ) * 100;
+    
+    // Cap score at 100 for consistency
+    score = Math.min(100, score);
+    
+    return {
+      month,
+      score: Math.round(score * 10) / 10, // Round to 1 decimal place
+      uniqueVenuesRatio,
+      uniqueItemsRatio,
+      newOrderRatio
+    };
+  });
+}
+
+// Calculate diversity score statistics
+export function getDiversityScoreStats(scores: DiversityScore[]) {
+  if (scores.length === 0) {
+    return { average: 0, highest: 0, lowest: 0, trend: 'stable' };
+  }
+  
+  const average = scores.reduce((sum, score) => sum + score.score, 0) / scores.length;
+  const highest = Math.max(...scores.map(s => s.score));
+  const lowest = Math.min(...scores.map(s => s.score));
+  
+  // Calculate trend (are scores increasing, decreasing, or stable?)
+  let trend = 'stable';
+  if (scores.length >= 3) {
+    const recentMonths = scores.slice(-3);
+    const firstScore = recentMonths[0].score;
+    const lastScore = recentMonths[recentMonths.length - 1].score;
+    
+    if (lastScore > firstScore * 1.1) { // 10% increase threshold
+      trend = 'increasing';
+    } else if (lastScore < firstScore * 0.9) { // 10% decrease threshold
+      trend = 'decreasing';
+    }
+  }
+  
+  return {
+    average: Math.round(average * 10) / 10,
+    highest: Math.round(highest * 10) / 10, 
+    lowest: Math.round(lowest * 10) / 10,
+    trend
+  };
+}

@@ -1,7 +1,7 @@
 import type { WoltOrder } from '../../woltorder';
 import { getOrdersByMonth, getTopVenuesByOrderCount, getTopVenuesBySpending, 
   getAverageOrderValueByMonth, getOrdersByDayOfWeek, getOrdersByTimeOfDay, 
-  getFavoriteItems, getSummaryStats } from './orderUtils';
+  getFavoriteItems, getSummaryStats, calculateDiversityScores, getDiversityScoreStats } from './orderUtils';
 import pako from 'pako';
 
 interface PrivacySettings {
@@ -18,6 +18,8 @@ interface SharedStats {
   ordersByTime: ReturnType<typeof getOrdersByTimeOfDay>;
   favoriteItems: ReturnType<typeof getFavoriteItems>;
   summary: ReturnType<typeof getSummaryStats>;
+  diversityScores: ReturnType<typeof calculateDiversityScores>;
+  diversityStats: ReturnType<typeof getDiversityScoreStats>;
 }
 
 export interface SharedData {
@@ -29,7 +31,7 @@ type CompressedDay = [number, number]; // [dayIndex, count]
 type CompressedTime = [number, number]; // [timeIndex, count]
 
 // Ultra compact data structure with privacy flags
-// [privacyFlags, monthData[], venueCountData[], venueSpendData[], avgData[], dayData[], timeData[], favoritesData[], summaryData]
+// [privacyFlags, monthData[], venueCountData[], venueSpendData[], avgData[], dayData[], timeData[], favoritesData[], summaryData, diversityScores[], diversityStats]
 type UltraCompactStats = [
   [boolean, boolean], // hideVenues, hideItems
   [string, number, number][], // month (compressed), count, total*100
@@ -39,7 +41,9 @@ type UltraCompactStats = [
   CompressedDay[], // [dayIndex, count] pairs
   CompressedTime[], // [timeIndex, count] pairs
   [string, number][], // item, count
-  number[] // [totalOrders, totalSpent*100, avgOrderValue*100, longestStreak]
+  number[], // [totalOrders, totalSpent*100, avgOrderValue*100, longestStreak]
+  [string, number, number, number, number][], // [month (compressed), score*10, uniqueVenuesRatio*100, uniqueItemsRatio*100, newOrderRatio*100]
+  [number, number, number, string] // [average*10, highest*10, lowest*10, trend]
 ];
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -113,6 +117,15 @@ function compactifyStats(stats: SharedStats, privacySettings: PrivacySettings): 
       integerize(processedStats.summary.totalSpent),
       integerize(processedStats.summary.averageOrderValue),
       processedStats.summary.longestStreak
+    ],
+    processedStats.diversityScores.map(({ month, score, uniqueVenuesRatio, uniqueItemsRatio, newOrderRatio }) => 
+      [compressMonth(month), Math.round(score * 10), integerize(uniqueVenuesRatio), 
+       integerize(uniqueItemsRatio), integerize(newOrderRatio)]),
+    [
+      Math.round(processedStats.diversityStats.average * 10),
+      Math.round(processedStats.diversityStats.highest * 10),
+      Math.round(processedStats.diversityStats.lowest * 10),
+      processedStats.diversityStats.trend
     ]
   ];
 }
@@ -153,6 +166,24 @@ function decompactifyStats(compact: UltraCompactStats): SharedData {
         totalSpent: deintegerize(data[7][1]),
         averageOrderValue: deintegerize(data[7][2]),
         longestStreak: data[7][3]
+      },
+      diversityScores: data[8] ? data[8].map(([month, score, uniqueVenuesRatio, uniqueItemsRatio, newOrderRatio]) => ({
+        month: decompressMonth(month),
+        score: score / 10,
+        uniqueVenuesRatio: deintegerize(uniqueVenuesRatio),
+        uniqueItemsRatio: deintegerize(uniqueItemsRatio),
+        newOrderRatio: deintegerize(newOrderRatio)
+      })) : [],
+      diversityStats: data[9] ? {
+        average: data[9][0] / 10,
+        highest: data[9][1] / 10,
+        lowest: data[9][2] / 10,
+        trend: data[9][3] as 'increasing' | 'decreasing' | 'stable'
+      } : {
+        average: 0,
+        highest: 0,
+        lowest: 0,
+        trend: 'stable'
       }
     }
   };
@@ -185,6 +216,9 @@ export function decompressStats(compressed: string): SharedData | null {
 }
 
 export function generateStatsForSharing(orders: WoltOrder[]): SharedStats {
+  const diversityScores = calculateDiversityScores(orders);
+  const diversityStats = getDiversityScoreStats(diversityScores);
+  
   return {
     monthlyOrders: getOrdersByMonth(orders),
     topVenuesByCount: getTopVenuesByOrderCount(orders, 10),
@@ -193,6 +227,8 @@ export function generateStatsForSharing(orders: WoltOrder[]): SharedStats {
     ordersByDay: getOrdersByDayOfWeek(orders),
     ordersByTime: getOrdersByTimeOfDay(orders),
     favoriteItems: getFavoriteItems(orders, 10),
-    summary: getSummaryStats(orders)
+    summary: getSummaryStats(orders),
+    diversityScores,
+    diversityStats
   };
 }

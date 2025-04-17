@@ -19,28 +19,6 @@
 
 ---
 
-## 2. Order Diversity Score
-### Requirements
-- Calculate monthly diversity metrics for ordering patterns
-- Track unique items and venues per month
-- Create a scoring system for ordering variety
-- Visualize variety trends over time
-
-### Technical Implementation
-- Add new utility functions for diversity calculations
-- Create a new chart component for score visualization
-- Store historical scores for trend analysis
-- Implement scoring algorithm based on:
-  - Unique venues ratio
-  - Unique items ratio
-  - New vs. repeated orders
-
-### Dependencies
-- Existing order and venue data
-- No additional external data required
-
----
-
 ## 3. Weather Correlation Analysis
 ### Requirements
 - Show correlation between weather conditions and order patterns
@@ -158,7 +136,6 @@
 
 ## Implementation Priority
 1. Price Range Analysis (Highest value/lowest complexity)
-2. Order Diversity Score (High value/low complexity)
 3. Advanced Time Pattern Analysis (High value/medium complexity)
 4. Seasonal Analysis and Calendar Heatmap (High value/medium complexity)
 5. Combo Analysis (Medium value/medium complexity)

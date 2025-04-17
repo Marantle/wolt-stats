@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import type { WoltOrder, WoltOrderFile } from '../../woltorder';
 import { getOrdersByMonth, getTopVenuesByOrderCount, getTopVenuesBySpending, 
   getAverageOrderValueByMonth, getOrdersByDayOfWeek, getOrdersByTimeOfDay, 
-  getFavoriteItems, formatCurrency, getSummaryStats } from '../../utils/orderUtils';
+  getFavoriteItems, formatCurrency, getSummaryStats, calculateDiversityScores } from '../../utils/orderUtils';
 import { generateStatsForSharing, compressStats, decompressStats, type SharedData } from '../../utils/shareUtils';
 import Welcome from './Welcome';
 import StatsCard from './StatsCard';
+import DiversityScoreStatsCard from './DiversityScoreStatsCard';
 import FavoriteItemsTable from './FavoriteItemsTable';
 import MonthlyOrdersChart from './charts/MonthlyOrdersChart';
 import MonthlySpendingChart from './charts/MonthlySpendingChart';
@@ -14,6 +15,7 @@ import TopVenuesBySpendingChart from './charts/TopVenuesBySpendingChart';
 import AvgOrderOverTimeChart from './charts/AvgOrderOverTimeChart';
 import OrdersByDayChart from './charts/OrdersByDayChart';
 import OrderTimeHistogram from './charts/OrderTimeHistogram';
+import DiversityScoreChart from './charts/DiversityScoreChart';
 
 interface PrivacySettings {
   hideVenues: boolean;
@@ -104,8 +106,16 @@ export default function App() {
     ordersByDay,
     ordersByTime,
     favoriteItems,
-    summary: { totalOrders, totalSpent, averageOrderValue, longestStreak }
+    summary: { totalOrders, totalSpent, averageOrderValue, longestStreak },
+    diversityScores,
+    diversityStats
   } = stats;
+
+  // Ensure diversityStats.trend has the correct type
+  const typedDiversityStats = {
+    ...diversityStats,
+    trend: diversityStats.trend as 'increasing' | 'decreasing' | 'stable'
+  };
 
   return (
     <>
@@ -174,34 +184,49 @@ export default function App() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard 
-            title="Total Orders" 
-            value={totalOrders} 
-            description="All-time number of orders"
-            color="blue"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-1">
+            <StatsCard 
+              title="Total Orders" 
+              value={totalOrders} 
+              description="All-time number of orders"
+              color="blue"
+            />
+          </div>
           
-          <StatsCard 
-            title="Total Spent" 
-            value={formatCurrency(totalSpent)}
-            description="All-time spending"
-            color="green"
-          />
+          <div className="lg:col-span-1">
+            <StatsCard 
+              title="Total Spent" 
+              value={formatCurrency(totalSpent)}
+              description="All-time spending"
+              color="green"
+            />
+          </div>
           
-          <StatsCard 
-            title="Average Order Value" 
-            value={formatCurrency(averageOrderValue)}
-            description="Average amount per order"
-            color="purple"
-          />
+          <div className="lg:col-span-1">
+            <StatsCard 
+              title="Average Order Value" 
+              value={formatCurrency(averageOrderValue)}
+              description="Average amount per order"
+              color="purple"
+            />
+          </div>
           
-          <StatsCard 
-            title="Longest Order Streak" 
-            value={longestStreak}
-            description="Consecutive days with orders"
-            color="amber"
-          />
+          <div className="lg:col-span-1">
+            <DiversityScoreStatsCard
+              orders={orderData || []}
+              diversityStats={typedDiversityStats}
+            />
+          </div>
+          
+          <div className="lg:col-span-1">
+            <StatsCard 
+              title="Longest Order Streak" 
+              value={longestStreak}
+              description="Consecutive days with orders"
+              color="amber"
+            />
+          </div>
         </div>
       </div>
 
@@ -216,12 +241,19 @@ export default function App() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <DiversityScoreChart 
+          orders={orderData || []} 
+          diversityScores={diversityScores}
+        />
         <AvgOrderOverTimeChart avgOrderByMonth={avgOrderByMonth} />
-        <OrdersByDayChart ordersByDay={ordersByDay} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <OrdersByDayChart ordersByDay={ordersByDay} />
         <OrderTimeHistogram ordersByTime={ordersByTime} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <FavoriteItemsTable items={favoriteItems} isCensored={privacySettings.hideItems} />
       </div>
     </>

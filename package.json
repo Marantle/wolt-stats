@@ -6,7 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "vitest run src/__tests__"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.4",
@@ -25,6 +31,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",
-    "@types/node": "^22.14.1"
+    "@types/node": "^22.14.1",
+    "@vitejs/plugin-react": "4.4.0",
+    "@vitest/coverage-istanbul": "^1.6.1",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.1.1"
   }
 }
