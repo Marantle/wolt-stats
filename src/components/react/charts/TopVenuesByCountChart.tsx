@@ -51,7 +51,7 @@ const TopVenuesByCountChart: React.FC<TopVenuesByCountChartProps> = ({
       <Chart
         id={id}
         title="Top Venues by Order Count"
-        subtitle="Places you order from the most"
+        subtitle={isCensored ? "Places you order from the most (Names hidden - use buttons above to show)" : "Places you order from the most"}
         type="bar"
         data={data}
         options={options}

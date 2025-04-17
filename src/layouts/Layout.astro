@@ -16,7 +16,16 @@ const { title = "Wolt Stats Dashboard" } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-			<title>{title}</title>
+		<title>{title}</title>
+		
+		<!-- OpenGraph tags -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content="Personal Wolt order history visualization and statistics dashboard. Track your spending, favorite restaurants, and ordering patterns." />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Wolt Stats Dashboard" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content="Personal Wolt order history visualization and statistics dashboard. Track your spending, favorite restaurants, and ordering patterns." />
 	</head>
 	<body class="bg-gray-50 min-h-screen">
 		<header class="bg-blue-600 text-white shadow-md">

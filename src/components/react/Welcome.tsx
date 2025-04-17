@@ -98,6 +98,11 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
             <p>✓ Contains complete order history</p>
             <p>✓ Filename: wolt_order_dump.json</p>
           </div>
+          <div className="mt-4 text-sm space-y-2">
+            <p className="text-gray-600">
+              🔒 For your privaty, the data stays in your browser - this site is completely static and does not send your data anywhere
+            </p>
+          </div>
         </div>
       </div>
     </div>

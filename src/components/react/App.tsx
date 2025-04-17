@@ -23,9 +23,10 @@ interface PrivacySettings {
 export default function App() {
   const [orderData, setOrderData] = useState<WoltOrder[] | null>(null);
   const [sharedData, setSharedData] = useState<SharedData | null>(null);
+  const [showPrivacyInfo, setShowPrivacyInfo] = useState(false);
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
-    hideVenues: true,
-    hideItems: true
+    hideVenues: false,
+    hideItems: false
   });
 
   useEffect(() => {
@@ -55,8 +56,19 @@ export default function App() {
     url.searchParams.set('stats', compressed);
     
     // Copy to clipboard
+    const privacyMessage = [
+      'Share link copied to clipboard!',
+      '',
+      'This link includes:',
+      '• All aggregate statistics and trends',
+      privacySettings.hideVenues ? '• Anonymized restaurant names ([Venue 1], [Venue 2], etc.)' : '• Restaurant names',
+      privacySettings.hideItems ? '• Anonymized ordered items ([Item 1], [Item 2], etc.)' : '• Ordered items',
+      '',
+      'Original order data is not included in the shared link.'
+    ].join('\n');
+
     navigator.clipboard.writeText(url.toString())
-      .then(() => alert('Share link copied to clipboard!'))
+      .then(() => alert(privacyMessage))
       .catch(() => alert('Failed to copy share link'));
   };
 
@@ -117,12 +129,40 @@ export default function App() {
                     {privacySettings.hideItems ? 'Show Items' : 'Hide Items'}
                   </button>
                 </div>
-                <button
-                  onClick={handleShare}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  Share Stats
-                </button>
+                <div className="relative flex gap-2">
+                  <button
+                    onClick={() => setShowPrivacyInfo(!showPrivacyInfo)}
+                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                    title="Show privacy information"
+                  >
+                    🔒 Info
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Share Stats
+                  </button>
+                  {showPrivacyInfo && (
+                    <div className="z-10 absolute top-full mt-1 right-0 bg-gray-800 text-white text-sm p-3 rounded shadow-lg w-80">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="font-medium">Your shared link will include:</p>
+                        <button 
+                          onClick={() => setShowPrivacyInfo(false)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <ul className="list-disc list-inside space-y-1 text-gray-300">
+                        <li>Aggregate statistics and trends</li>
+                        <li>{privacySettings.hideVenues ? "Anonymized restaurant names ([Venue 1], [Venue 2], etc.)" : "Restaurant names"}</li>
+                        <li>{privacySettings.hideItems ? "Anonymized ordered items ([Item 1], [Item 2], etc.)" : "Ordered items"}</li>
+                        <li className="mt-2 text-gray-400 italic">Your original order data is not included in the shared link</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             <button

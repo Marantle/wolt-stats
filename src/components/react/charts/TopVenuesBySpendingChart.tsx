@@ -53,7 +53,7 @@ const TopVenuesBySpendingChart: React.FC<TopVenuesBySpendingChartProps> = ({
       <Chart
         id={id}
         title="Top Venues by Total Spent"
-        subtitle="Where you've spent the most money"
+        subtitle={isCensored ? "Where you've spent the most money (Names hidden - use buttons above to show)" : "Where you've spent the most money"}
         type="bar"
         data={data}
         options={options}

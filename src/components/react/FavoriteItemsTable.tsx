@@ -20,7 +20,10 @@ const FavoriteItemsTable: React.FC<FavoriteItemsTableProps> = ({
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-1">{title}</h2>
+      {isCensored && (
+        <p className="text-gray-500 text-sm mb-4">Items hidden - use buttons above to show</p>
+      )}
       <div className="overflow-auto" style={{ maxHeight }}>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
