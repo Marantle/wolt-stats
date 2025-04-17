@@ -24,3 +24,9 @@ pnpm-debug.log*
 .idea/
 
 wolt_order_dump.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

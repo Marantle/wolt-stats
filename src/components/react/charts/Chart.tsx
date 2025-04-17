@@ -65,10 +65,10 @@ const ChartComponent: React.FC<ChartProps> = ({
   const mergedOptions = { ...defaultOptions, ...options };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+    <div className="bg-white p-4 rounded-lg shadow-md mb-6" data-testid="chart-container">
       <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
       {subtitle && <p className="text-gray-500 mb-4">{subtitle}</p>}
-      <div style={{ width, height, position: 'relative' }}>
+      <div style={{ width, height, position: 'relative' }} data-testid="chart">
         {type === 'bar' ? (
           <Bar id={id} data={data as ChartData<'bar'>} options={mergedOptions} />
         ) : (

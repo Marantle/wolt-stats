@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { WoltOrderFile } from '../../woltorder';
 
 interface WelcomeProps {
@@ -8,22 +8,9 @@ interface WelcomeProps {
 
 export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const file = e.dataTransfer.files[0];
+  const processFile = useCallback((file: File) => {
     if (file && file.type === 'application/json') {
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -43,6 +30,34 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
       alert('Please upload a JSON file.');
     }
   }, [onDataLoaded]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    processFile(file);
+  }, [processFile]);
+
+  const handleClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  }, [processFile]);
 
   if (isSharedView) {
     return (
@@ -74,25 +89,32 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
       <div className="max-w-2xl mx-auto">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">How to get your order data:</h3>
         <ol className="text-left text-gray-600 mb-6 space-y-2 list-decimal list-inside">
-          <li>Visit <a href="https://wolt.com/en/me/order-history" className="text-blue-600 hover:underline" target="_blank" rel="noopener">Wolt Order History</a></li>
-          <li>Open your browser's Developer Tools (F12)</li>
-          <li>Go to the Network tab</li>
-          <li>Refresh the page</li>
-          <li>Find the request to <code className="bg-gray-100 px-2 py-1 rounded">order_history</code></li>
-          <li>Right-click and select "Copy as cURL"</li>
-          <li>Paste in your terminal, modify the URL's limit parameter to 5000</li>
-          <li>Pipe the output to <code className="bg-gray-100 px-2 py-1 rounded">wolt_order_dump.json</code></li>
+          <li>Go to <a href="https://wolt.com/en/account/order-history" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wolt Order History</a></li>
+          <li>Click on "Request order history"</li>
+          <li>Check your email for the order history file</li>
+          <li>Drop the file below or click to upload</li>
         </ol>
 
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileInputChange}
+          accept="application/json"
+          className="hidden"
+          data-testid="file-input"
+        />
+
         <div 
-          className={`flex flex-col items-center justify-center min-h-[200px] border-4 border-dashed rounded-lg p-8 transition-colors ${
-            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+          className={`flex flex-col items-center justify-center min-h-[200px] border-4 border-dashed rounded-lg p-8 transition-colors cursor-pointer ${
+            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onClick={handleClick}
+          data-testid="dropzone"
         >
-          <p className="font-medium mb-4">Drop your Wolt order data file here</p>
+          <p className="font-medium mb-4">Drop your Wolt order data file here or click to upload</p>
           <div className="text-sm text-gray-500 space-y-1">
             <p>✓ File format: JSON</p>
             <p>✓ Contains complete order history</p>
@@ -100,7 +122,7 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
           </div>
           <div className="mt-4 text-sm space-y-2">
             <p className="text-gray-600">
-              🔒 For your privaty, the data stays in your browser - this site is completely static and does not send your data anywhere
+              🔒 For your privaty, the data stays in your browser
             </p>
           </div>
         </div>

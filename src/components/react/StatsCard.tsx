@@ -28,14 +28,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
   const bgClass = colorClasses[color] || colorClasses.blue;
 
   return (
-    <div className={`p-6 rounded-lg shadow-sm border ${bgClass} mb-6`} id={id}>
+    <div 
+      className={`p-6 rounded-lg shadow-sm border ${bgClass} mb-6`} 
+      id={id}
+      data-testid={`stats-card-${title.toLowerCase().replace(/\s+/g, '-')}`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">{title}</h3>
-          <p className="text-3xl font-bold mt-2">{value}</p>
-          {description && <p className="mt-1 text-sm opacity-80">{description}</p>}
+          <h3 className="text-lg font-medium" data-testid="stats-card-title">{title}</h3>
+          <p className="text-3xl font-bold mt-2" data-testid="stats-card-value">{value}</p>
+          {description && <p className="mt-1 text-sm opacity-80" data-testid="stats-card-description">{description}</p>}
         </div>
-        {icon && <div className="text-4xl opacity-75">{icon}</div>}
+        {icon && <div className="text-4xl opacity-75" data-testid="stats-card-icon">{icon}</div>}
       </div>
     </div>
   );
