@@ -30,3 +30,5 @@ wolt_order_dump.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+/coverage/
