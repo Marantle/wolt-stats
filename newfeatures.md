@@ -1,151 +1,73 @@
-# Future Features Requirements Document
+# New Features for Wolt Stats Dashboard
 
-## 1. Seasonal Analysis and Calendar Heatmap
-### Requirements
-- Implement a calendar-style heatmap visualization of order patterns
-- Show order frequency intensity through color gradients
-- Highlight seasonal patterns, holidays, and weekends
-- Track year-over-year seasonal trends
+This document outlines proposed new features for the Wolt Stats Dashboard, maintaining its static nature and privacy-focused approach.
 
-### Technical Implementation
-- Use existing order timestamp data from WoltOrder interface
-- Create a new React component for heatmap visualization
-- Implement at build time using order date data
-- Add color intensity scaling based on order frequency
+## Functional Requirements
 
-### Dependencies
-- Existing order date/time data
-- No additional external data required
+| Requirement ID | Description | User Story | Expected Behavior/Outcome |
+|---------------|-------------|------------|-------------------------|
+| NFR001 | Spending Category Analysis | As a user, I want to see my spending patterns categorized by cuisine types | - Analyze venue names and items to categorize orders (e.g., Pizza, Asian, Fast Food)<br>- Display a pie chart of spending by category<br>- Show trends of category spending over time |
+| NFR002 | Sustainability Score | As a user, I want to understand my ordering habits' environmental impact | - Calculate a score based on delivery distance and packaging<br>- Show monthly sustainability trends<br>- Provide tips for more sustainable ordering |
+| NFR003 | Advanced Order Patterns | As a user, I want to see detailed patterns in my ordering behavior | - Identify common order combinations<br>- Show correlation between weather/holidays and ordering frequency<br>- Highlight personal "rush hours" |
+| NFR004 | Price Trend Analysis | As a user, I want to track how prices for my favorite items have changed | - Track price changes for frequently ordered items<br>- Display price trends over time<br>- Highlight significant price changes |
+| NFR005 | Customizable Dashboard Layout | As a user, I want to arrange the dashboard according to my preferences | - Drag-and-drop chart positioning<br>- Ability to show/hide specific charts<br>- Save layout preferences to localStorage |
+| NFR006 | Local Data Comparison | As a user, I want to compare my stats with previous uploads | - Store previous uploads in localStorage<br>- Show year-over-year comparisons<br>- Highlight significant changes in habits |
+| NFR007 | Smart Insights Generation | As a user, I want to see interesting insights about my ordering habits | - Automatically detect unusual patterns<br>- Identify peak ordering periods<br>- Surface interesting statistics and records |
+| NFR008 | Export Capabilities | As a user, I want to export my analyzed data in different formats | - Export charts as images<br>- Download analyzed data as CSV<br>- Generate shareable reports as PDF |
+| NFR009 | Enhanced Privacy Controls | As a user, I want more granular control over what data is shared | - Custom anonymization rules<br>- Selective chart sharing<br>- Adjustable data granularity in shared views |
+| NFR010 | Offline Support | As a user, I want to access my stats even without internet connection | - Complete PWA implementation<br>- Offline data persistence<br>- Background data processing |
 
----
+## Technical Requirements
 
-## 3. Weather Correlation Analysis
-### Requirements
-- Show correlation between weather conditions and order patterns
-- Integrate historical weather data at build time
-- Create visualizations for weather-order relationships
-- Identify weather-based ordering trends
+1. **Performance Optimizations**
+   - Implement virtual scrolling for large datasets
+   - Use web workers for heavy calculations
+   - Optimize chart rendering with lazy loading
 
-### Technical Implementation
-- Add build-time weather data integration
-- Create weather-order correlation utilities
-- Implement new visualization components
-- Generate static weather-order mapping
+2. **Accessibility Improvements**
+   - Add keyboard navigation for all features
+   - Implement screen reader optimizations
+   - Support high contrast mode
+   - Add ARIA labels and roles
 
-### Dependencies
-- Historical weather data (to be added at build time)
-- Existing order timestamp data
-- Weather data API or static dataset
+3. **Local Storage Management**
+   - Implement data compression for local storage
+   - Add storage quota management
+   - Provide storage cleanup utilities
 
----
+4. **PWA Features**
+   - Add service worker for offline functionality
+   - Implement app manifest
+   - Add install prompts
+   - Enable background sync
 
-## 4. Price Range Analysis
-### Requirements
-- Implement price bracket categorization (budget/mid-range/premium)
-- Show spending distribution across price ranges
-- Track "splurge" orders and special occasions
-- Visualize price range patterns over time
+5. **Enhanced Error Handling**
+   - Add detailed error messages
+   - Implement error boundary components
+   - Add retry mechanisms for failed operations
 
-### Technical Implementation
-- Add price range categorization logic
-- Create new chart components for price distribution
-- Implement "splurge" detection algorithm
-- Add price trend visualization
+## Implementation Notes
 
-### Dependencies
-- Existing order price data
-- No additional external data required
+- All features must maintain the current privacy-first approach
+- No external API calls or data storage outside the browser
+- Use existing tech stack (Astro, React, TailwindCSS)
+- Maintain current performance standards
+- All new features must have corresponding unit and e2e tests
 
----
+## Migration Plan
 
-## 5. Geographic Clustering
-### Requirements
-- Create static maps showing order location clusters
-- Visualize favorite "food neighborhoods"
-- Show delivery radius patterns
-- Generate heat maps of order locations
+1. Phase 1: Core Feature Enhancements (NFR001-NFR004)
+2. Phase 2: UI/UX Improvements (NFR005-NFR007)
+3. Phase 3: Advanced Features (NFR008-NFR010)
 
-### Technical Implementation
-- Use static map generation at build time
-- Implement location clustering algorithm
-- Create static map visualization components
-- Generate location-based statistics
+Each phase should include:
+- Feature implementation
+- Test coverage
+- Documentation updates
+- Performance benchmarking
 
-### Dependencies
-- Venue location data (needs to be added to data structure)
-- Static map generation library (@tmcw/static-maps)
-
----
-
-## 6. Advanced Time Pattern Analysis
-### Requirements
-- Create circular time-of-day visualization
-- Show weekday vs. weekend patterns
-- Identify peak ordering hours
-- Track ordering time trends
-
-### Technical Implementation
-- Implement circular chart component
-- Add time pattern analysis utilities
-- Create time-based pattern detection
-- Generate time-based statistics
-
-### Dependencies
-- Existing order timestamp data
-- No additional external data required
-
----
-
-## 7. Cuisine Type Analysis
-### Requirements
-- Categorize venues by cuisine type
-- Track cuisine preferences over time
-- Calculate cuisine diversity metrics
-- Show cuisine pattern changes
-
-### Technical Implementation
-- Add cuisine categorization system
-- Implement cuisine tracking utilities
-- Create cuisine trend visualizations
-- Generate cuisine-based statistics
-
-### Dependencies
-- Venue cuisine type data (needs to be added)
-- Cuisine classification system
-
----
-
-## 8. Combo Analysis
-### Requirements
-- Identify frequently combined items
-- Show popular meal combinations
-- Track combination trends over time
-- Visualize combination patterns
-
-### Technical Implementation
-- Implement combination detection algorithm
-- Create combination analysis utilities
-- Add combination visualization components
-- Generate combination statistics
-
-### Dependencies
-- Existing order items data
-- No additional external data required
-
----
-
-## Implementation Priority
-1. Price Range Analysis (Highest value/lowest complexity)
-3. Advanced Time Pattern Analysis (High value/medium complexity)
-4. Seasonal Analysis and Calendar Heatmap (High value/medium complexity)
-5. Combo Analysis (Medium value/medium complexity)
-6. Cuisine Type Analysis (Medium value/medium complexity)
-7. Geographic Clustering (Medium value/high complexity)
-8. Weather Correlation Analysis (Lowest priority due to external dependencies)
-
-## Notes
-- All features must maintain the static nature of the site
-- No external API calls during runtime
-- All data processing should happen at build time
-- Maintain current privacy-focused approach
-- Keep performance impact minimal
+<!-- Data Analysis: Added deeper insights with cuisine categorization, price tracking, and pattern detection
+Customization: Introduced dashboard customization and enhanced privacy controls
+Offline Capabilities: Proposed PWA features for better offline experience
+Export Options: Added various export formats while keeping everything local
+Technical Improvements: Included performance optimizations and accessibility enhancements -->

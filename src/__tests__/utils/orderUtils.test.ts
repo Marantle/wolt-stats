@@ -157,7 +157,7 @@ describe('orderUtils', () => {
     });
 
     it('should handle orders without items', () => {
-      const orders = [{ ...createSampleOrders()[0], items: undefined }];
+      const orders = [{ ...createSampleOrders()[0], items: '' }];
       const favorites = getFavoriteItems(orders);
       expect(favorites).toHaveLength(0);
     });
