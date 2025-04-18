@@ -110,9 +110,9 @@ const { title, description } = Astro.props;
 
 ### Unit Testing
 - Use **Vitest** for a fast, reliable testing experience compatible with Vite.
-- Utilize mocking libraries such as `@testing-library/react` and `msw` (Mock Service Worker) for mocking APIs and components.
 - Aim for high coverage with tools like **Istanbul** to identify untested areas.
 - Keep unit tests granular, fast, and deterministic.
+- Write tests for any new util files
 
 Example Vitest configuration (`vite.config.ts`):
 ```typescript
