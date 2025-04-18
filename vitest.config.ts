@@ -8,6 +8,15 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
+      include: ['src/utils/**/*.ts'],
+      exclude: ['**/*.d.ts', '**/*.test.ts'],
+      all: true,
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80
+      }
     },
   },
 });
