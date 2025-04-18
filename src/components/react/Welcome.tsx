@@ -89,10 +89,14 @@ export default function Welcome({ onDataLoaded, isSharedView }: WelcomeProps) {
       <div className="max-w-2xl mx-auto">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">How to get your order data:</h3>
         <ol className="text-left text-gray-600 mb-6 space-y-2 list-decimal list-inside">
-          <li>Go to <a href="https://wolt.com/en/account/order-history" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wolt Order History</a></li>
-          <li>Click on "Request order history"</li>
-          <li>Check your email for the order history file</li>
-          <li>Drop the file below or click to upload</li>
+          <li>Visit <a href="https://wolt.com/en/me/order-history" className="text-blue-600 hover:underline" target="_blank" rel="noopener">Wolt Order History</a></li>
+          <li>Open your browser's Developer Tools (F12)</li>
+          <li>Go to the Network tab</li>
+          <li>Refresh the page</li>
+          <li>Find the request to <code className="bg-gray-100 px-2 py-1 rounded">order_history</code></li>
+          <li>Right-click and select "Copy as cURL"</li>
+          <li>Paste in your terminal, modify the URL's limit parameter to 5000</li>
+          <li>Pipe the output to <code className="bg-gray-100 px-2 py-1 rounded">wolt_order_dump.json</code></li>
         </ol>
 
         <input
